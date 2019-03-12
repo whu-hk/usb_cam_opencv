@@ -1,0 +1,12 @@
+<launch>
+  <node name="usb_cam_opencv_node" pkg="usb_cam_opencv" type="usb_cam_opencv_node" output="screen" >
+	  <param name="Topic_image" type="string" value="camera/bgr/image_raw"/>
+	   <!--摄像头索引-->
+	  <param name="Video_index" type="int" value="1"/> 
+	   <!--畸变校正-->
+	  <param name="Distortion_correct" type="bool" value="true"/>  
+	   <!--像素分辨率-->
+	  <param name="Param_width" type="int" value="1920"/>  
+	  <param name="Param_height" type="int" value="1080"/>  
+  </node>
+</launch>
