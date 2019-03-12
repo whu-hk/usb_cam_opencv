@@ -20,6 +20,8 @@ void Opencv_cam::initialize()
 	nh_local_.param<bool>("Distortion_correct",distortion_correct_,true);
 	nh_local_.param<int>("Param_width",param_width_,640);
 	nh_local_.param<int>("Param_height",param_height_,480);
+	nh_local_.param<double>("new_intrinsic_mat_X",new_intrinsic_mat_x_,0.8);
+	nh_local_.param<double>("new_intrinsic_mat_Y",new_intrinsic_mat_y_,0.8);
 }
 
 int count_fps()
@@ -64,15 +66,15 @@ int Opencv_cam::pubFrames()
     }
     else
         std::cout<<"&&&  Open video"<<video_index_<<" success!"<<std::endl;
+        
     cv::Mat frame;
-    cv::Mat undistort_frame;
+    cv::Mat new_intrinsic_mat;
 	if(distortion_correct_)
 		std::cout << "!!!  Distortion corrected" << std::endl;    
 	else
 		std::cout << "!!!  Distortion exist" << std::endl;
 	
 	cv::Mat K,D;
-    cv::Mat new_intrinsic_mat;
     if(param_width_ == 640 && param_height_ == 480)
     {
         K = K_1;
@@ -99,8 +101,8 @@ int Opencv_cam::pubFrames()
     //0.86使得640x480横向像素正好完全填充，0.8为标定时的视场
     //new_intrinsic_mat.at<double>(1, 1) *= 1;
     
-    new_intrinsic_mat.at<double>(0, 0) *= 0.8; 
-    new_intrinsic_mat.at<double>(1, 1) *= 0.8;
+    new_intrinsic_mat.at<double>(0, 0) *= new_intrinsic_mat_x_; 
+    new_intrinsic_mat.at<double>(1, 1) *= new_intrinsic_mat_y_;
     
     //调整输出校正图的中心,主光点
     new_intrinsic_mat.at<double>(0, 2) += 0.5 * frame.cols;
@@ -121,13 +123,13 @@ int Opencv_cam::pubFrames()
 		cv::imshow("origin",frame);
 		if(distortion_correct_)
 		{  
-		    //if(param_width_ > 640 && param_height_ > 480)
-		    //{
-                cv::remap(frame,undistort_frame,mapx,mapy,INTER_LINEAR);
-		    //}
-		    //else  //640x480用第一种去畸变没有输出,用第一种方法对K,D等有很高的精度要求
-		    //    cv::fisheye::undistortImage(frame,undistort,K,D,new_intrinsic_mat);
-		    cv::imshow("Undistort",undistort_frame);
+		    if(param_width_ > 640 && param_height_ > 480)
+		    {
+                cv::remap(frame,frame,mapx,mapy,INTER_LINEAR);
+		    }
+		    else  //640x480用第一种去畸变没有输出,用第一种方法对K,D等有很高的精度要求
+		        cv::fisheye::undistortImage(frame,frame,K,D,new_intrinsic_mat);
+		    cv::imshow("Undistort",frame);
 		}
         char key = cv::waitKey(1);
         if(key == 'q' || key == 'Q' || key == 27)
