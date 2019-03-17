@@ -112,7 +112,10 @@ int Opencv_cam::pubFrames()
     Mat mapx = Mat(image_size, CV_32FC1);
     Mat mapy = Mat(image_size, CV_32FC1);
     Mat R = Mat::eye(3, 3, CV_32F);
-    cv::fisheye::initUndistortRectifyMap(K,D,R,getOptimalNewCameraMatrix(K,D,image_size,1,image_size,0),image_size,CV_32FC1,mapx,mapy);
+    //cv::fisheye::initUndistortRectifyMap(K,D,R,getOptimalNewCameraMatrix(K,D,image_size,1,image_size,0),image_size,CV_32FC1,mapx,mapy);
+    cv::fisheye::initUndistortRectifyMap(K,D,R,K,image_size,CV_32FC1,mapx,mapy);
+    std::string imgPath = "/home/whu-hk/Webcam";
+    int img_save_count = 0;
     while(nh_.ok()) 
     {  
         if(!cap.read(frame)) 
@@ -120,7 +123,8 @@ int Opencv_cam::pubFrames()
             std::cout << "!!!  No frame" << std::endl;
             break;
         }
-		cv::imshow("origin",frame);
+		//cv::imshow("origin",frame);
+		cv::namedWindow("Undistort",0);
 		if(distortion_correct_)
 		{  
 		    if(param_width_ > 640 && param_height_ > 480)
@@ -134,6 +138,13 @@ int Opencv_cam::pubFrames()
         char key = cv::waitKey(1);
         if(key == 'q' || key == 'Q' || key == 27)
           break;
+        if(key == 's' || key == 'S')
+        {
+          string imgName = imgPath + "/" + std::to_string(img_save_count) + ".jpg";
+          imwrite(imgName,frame);
+          std::cout<<"img_"<<img_save_count<<" save success"<<std::endl;
+          img_save_count++;
+        } 
 		std_msgs::Header header;
 		header.stamp = ros::Time::now();
 		header.frame_id = "head_camera";
