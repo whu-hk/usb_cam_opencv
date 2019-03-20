@@ -20,8 +20,8 @@ void Opencv_cam::initialize()
 	nh_local_.param<bool>("Distortion_correct",distortion_correct_,true);
 	nh_local_.param<int>("Param_width",param_width_,640);
 	nh_local_.param<int>("Param_height",param_height_,480);
-	nh_local_.param<double>("new_intrinsic_mat_X",new_intrinsic_mat_x_,0.8);
-	nh_local_.param<double>("new_intrinsic_mat_Y",new_intrinsic_mat_y_,0.8);
+	//nh_local_.param<double>("new_intrinsic_mat_X",new_intrinsic_mat_x_,0.8);
+	//nh_local_.param<double>("new_intrinsic_mat_Y",new_intrinsic_mat_y_,0.8);
 }
 
 int count_fps()
@@ -68,7 +68,7 @@ int Opencv_cam::pubFrames()
         std::cout<<"&&&  Open video"<<video_index_<<" success!"<<std::endl;
         
     cv::Mat frame;
-    cv::Mat new_intrinsic_mat;
+    //cv::Mat new_intrinsic_mat;
 	if(distortion_correct_)
 		std::cout << "!!!  Distortion corrected" << std::endl;    
 	else
@@ -101,21 +101,21 @@ int Opencv_cam::pubFrames()
     //0.86使得640x480横向像素正好完全填充，0.8为标定时的视场
     //new_intrinsic_mat.at<double>(1, 1) *= 1;
     
-    new_intrinsic_mat.at<double>(0, 0) *= new_intrinsic_mat_x_; 
-    new_intrinsic_mat.at<double>(1, 1) *= new_intrinsic_mat_y_;
+    //new_intrinsic_mat.at<double>(0, 0) *= new_intrinsic_mat_x_; 
+    //new_intrinsic_mat.at<double>(1, 1) *= new_intrinsic_mat_y_;
     
     //调整输出校正图的中心,主光点
-    new_intrinsic_mat.at<double>(0, 2) += 0.5 * frame.cols;
-    new_intrinsic_mat.at<double>(1, 2) += 0.5 * frame.rows;
-    int num = 0;
+    //new_intrinsic_mat.at<double>(0, 2) += 0.5 * frame.cols;
+    //new_intrinsic_mat.at<double>(1, 2) += 0.5 * frame.rows;
+    //int num = 0;
     cv::Size2i image_size(param_width_,param_height_);
     Mat mapx = Mat(image_size, CV_32FC1);
     Mat mapy = Mat(image_size, CV_32FC1);
     Mat R = Mat::eye(3, 3, CV_32F);
     //cv::fisheye::initUndistortRectifyMap(K,D,R,getOptimalNewCameraMatrix(K,D,image_size,1,image_size,0),image_size,CV_32FC1,mapx,mapy);
     cv::fisheye::initUndistortRectifyMap(K,D,R,K,image_size,CV_32FC1,mapx,mapy);
-    std::string imgPath = "/home/whu-hk/Webcam";
-    int img_save_count = 0;
+    //std::string imgPath = "/home/whu-hk/Webcam";
+    //int img_save_count = 0;
     while(nh_.ok()) 
     {  
         if(!cap.read(frame)) 
@@ -124,17 +124,18 @@ int Opencv_cam::pubFrames()
             break;
         }
 		//cv::imshow("origin",frame);
-		cv::namedWindow("Undistort",0);
+		//cv::namedWindow("Undistort",0);
 		if(distortion_correct_)
 		{  
-		    if(param_width_ > 640 && param_height_ > 480)
-		    {
+		    //if(param_width_ > 640 && param_height_ > 480)
+		    //{
                 cv::remap(frame,frame,mapx,mapy,INTER_LINEAR);
-		    }
-		    else  //640x480用第一种去畸变没有输出,用第一种方法对K,D等有很高的精度要求
-		        cv::fisheye::undistortImage(frame,frame,K,D,new_intrinsic_mat);
-		    cv::imshow("Undistort",frame);
+		    //}
+		    //else  //640x480用第一种去畸变没有输出,用第一种方法对K,D等有很高的精度要求
+		    //    cv::fisheye::undistortImage(frame,frame,K,D,new_intrinsic_mat);
+		    //cv::imshow("Undistort",frame);
 		}
+		/*
         char key = cv::waitKey(1);
         if(key == 'q' || key == 'Q' || key == 27)
           break;
@@ -145,15 +146,16 @@ int Opencv_cam::pubFrames()
           std::cout<<"img_"<<img_save_count<<" save success"<<std::endl;
           img_save_count++;
         } 
+        */
 		std_msgs::Header header;
 		header.stamp = ros::Time::now();
 		header.frame_id = "head_camera";
         sensor_msgs::ImagePtr msg = cv_bridge::CvImage(header, "bgr8", frame).toImageMsg();     
         pub.publish(msg);
         int fps = count_fps();
-        if(num % 80 == 0)
-            std::cout<<"FPS:"<<fps<<std::endl;
-        num++;  
+        //if(num % 80 == 0)
+        //    std::cout<<"FPS:"<<fps<<std::endl;
+        //num++;  
     }
 	return 0;
 }

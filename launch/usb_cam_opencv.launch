@@ -8,7 +8,7 @@
 	   <!--像素分辨率-->
 	  <param name="Param_width" type="int" value="1920"/>  
 	  <param name="Param_height" type="int" value="1080"/>  
-	  <param name="new_intrinsic_mat_X" type="double" value="0.8"/>
-	  <param name="new_intrinsic_mat_Y" type="double" value="0.8"/>
+	  <!-- param name="new_intrinsic_mat_X" type="double" value="0.8"/-->
+	  <!-- param name="new_intrinsic_mat_Y" type="double" value="0.8"/-->
   </node>
 </launch>
