@@ -95,7 +95,7 @@ int Opencv_cam::pubFrames()
         std::cout<<"error resolution"<<std::endl;
         return 0;
     }
-    K.copyTo(new_intrinsic_mat);
+    //K.copyTo(new_intrinsic_mat);
     //调整输出校正图的视场，归一化焦距
     //new_intrinsic_mat.at<double>(0, 0) *= 1; 
     //0.86使得640x480横向像素正好完全填充，0.8为标定时的视场
